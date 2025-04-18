@@ -4,21 +4,30 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { CallToolRequestSchema, ListToolsRequestSchema, } from "@modelcontextprotocol/sdk/types.js";
 import fetch from "node-fetch";
 
-// function getParams() {
-//   const email = process.env.WEBSITE_EMAIL;
-//   const password = process.env.WEBSITE_PASSWORD;
-//   if (!email || !password) {
-//       console.error("EMAIL or PASSWORD environment variable is not set");
-//       process.exit(1);
-//   }
-//   return {email, password};
-// }
-// const LOGIN_PARAMS = getParams();
+function getParams() {
+  const email = process.env.WEBSITE_EMAIL;
+  const password = process.env.WEBSITE_PASSWORD;
+  if (!email || !password) {
+      console.error("EMAIL or PASSWORD environment variable is not set");
+      process.exit(1);
+  }
+  return {email, password};
+}
+const LOGIN_PARAMS = getParams();
 
 const LOGIN_TOOL = {
   name: "maps_login",
   description: "登录高德地图，并返回用户的用户名",
-  inputSchema: {},
+  inputSchema: {
+    type: "object",
+    properties: {
+      serverName: {
+          type: "string",
+          description: "服务器名"
+      }
+    },
+    required: ["serverName"]
+  },
 };
 
 
@@ -28,8 +37,8 @@ const MAPS_TOOLS = [
 ];
 async function handleLogin() {
   const url = new URL("http://localhost:3000/api/v1/mcp/login");
-  url.searchParams.append("email", '370226263@qq.com');
-  url.searchParams.append("password", 'qwe123456');
+  url.searchParams.append("email", LOGIN_PARAMS.email);
+  url.searchParams.append("password", LOGIN_PARAMS.password);
   const response = await fetch(url.toString());
   const data = await response.json();
   if (data.code === 0) {
